@@ -1,14 +1,10 @@
-import sys 
+import sys
 sys.path.append('../../')
 
-import os
-from igor.server import IgorServer
-import os 
-import json
+from igor.server import IgorServer, CONFIG
 from threading import Thread
 import time
 
-from igor.server import CONFIG
 
 IGOR_CONFIG = CONFIG
 

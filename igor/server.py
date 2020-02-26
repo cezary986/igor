@@ -4,9 +4,7 @@ import json
 import logging
 from threading import Timer
 from igor.file_server import run_file_server
-import os
 import time
-import sys
 import threading
 import _thread 
 from igor.core import Stream, handler_wrapper, ProcessOutput
@@ -162,8 +160,7 @@ class IgorServer:
                     return
                 handler_function = self.paths.get(action, None)
                 if handler_function == None:
-                    
-                    self.__send_erorr(client, 'No handler for action: "' + action + '"', code=400)
+                    self.__send_erorr(client, 'No damn handler for action: "' + action + '"', code=400)
                     return
                 stream = self.streams.get(streamId, None)
                 if stream == None:

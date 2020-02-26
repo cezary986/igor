@@ -118,11 +118,7 @@ Each time action is being dispached new stream is created. It has its own unique
 
 ## Tests
 
-All tests are in `igor.test` package to run all of them use:
-
-```bash
-python -m unittest discover ./igor/test
-```
+All tests are in `igor.test` package, it is better to run them separately one by one especially `test_integration.py`
 
 File `test_server.py` contains unit test for server class, `test_core.py` containts unit tests for core igor classes such as Streams. `test_integration.py` containt integrations test of the server.
 

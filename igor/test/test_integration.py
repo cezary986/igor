@@ -14,8 +14,8 @@ import websocket
 import os
 
 try:
-    igor_process = subprocess.Popen('START ' + os.getcwd() + '\..\..\env\Scripts\python.exe server_instance.py', shell=True)
-except error:
+    igor_process = subprocess.Popen('START ' + os.getcwd() + '.\env\Scripts\python.exe server_instance.py', shell=True)
+except Exception:
     print('Unable to start igor server instance. Check if the port is not already in use')
 
 class TestServerIntegration(unittest.TestCase):
@@ -36,6 +36,7 @@ class TestServerIntegration(unittest.TestCase):
           result = json.loads(result)
         except error:
           self.fail('Message from server should be json serializable')
+        print(result)
         self.assertTrue(result.get('streamId', None) != None, 'Message should contain streamId field')
         self.assertTrue(result.get('data', None) != None, 'Message should contain data field')
         self.assertEqual(result['streamId'], 'test_calling_handler', 'Stream id should match the one send by the client')
@@ -45,12 +46,12 @@ class TestServerIntegration(unittest.TestCase):
         ws = websocket.WebSocket()
         try:
           ws.connect("ws://localhost:5678")
-        except error:
+        except Exception:
           self.fail('Should be able to connect to server. Check if port is not already in use')
         result =  ws.recv()
         try:
           result = json.loads(result)
-        except error:
+        except Exception:
           self.fail('Message from server should be json serializable')
         print(result)
         self.assertTrue(result.get('streamId', None) != None, 'Message should contain streamId field')
@@ -59,13 +60,13 @@ class TestServerIntegration(unittest.TestCase):
         self.assertEqual(result['streamId'], 'test_process', 'Stream id should match name of the process')
         self.assertEqual(result['action'], 'tick', 'Client should receive data from process')
         self.assertEqual(result['data'], 'tack', 'Client should receive data from process')
-        
+    
     def test_introduce_self(self):
         CLIENT_ID = 'CLIENT_1'
         ws = websocket.WebSocket()
         try:
           ws.connect("ws://localhost:5678")
-        except error:
+        except Exception:
           self.fail('Should be able to connect to server. Check if port is not already in use')
         ws.send(json.dumps({
           'streamId': 'introduce_self_stream_id',
@@ -86,7 +87,7 @@ class TestServerIntegration(unittest.TestCase):
         self.assertEqual(received_message['streamId'], 'test_process', 'Stream id should match name of the process')
         self.assertEqual(received_message['action'], 'tick', 'Client should receive data from process')
         self.assertEqual(received_message['data'], 'special_for_CLIENT_1', 'Client should receive data from process')
-
+    
     def test_sending_to_specified_client(self):
         ws = websocket.WebSocket()
         try:
@@ -102,6 +103,6 @@ class TestServerIntegration(unittest.TestCase):
           self.fail('Process should be able to send messages only to specified client')
 
 if __name__ == '__main__':
-    time.sleep(1)
+    time.sleep(2)
     unittest.main()
     igor_process.kill()
