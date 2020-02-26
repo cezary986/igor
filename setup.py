@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="igor-server",
+    name="igor_server",
     version="0.0.1",
     author="Cezary Maszczyk",
     author_email="cezary.maszczyk@gmail.com",

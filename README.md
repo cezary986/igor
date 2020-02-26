@@ -8,6 +8,12 @@ Igor consists of two main parts:
 
 Igor's using websockets for communiection which gives you easy and bideractional communication beetween your client and python backend. 
 
+## Instalation
+
+```bash
+pip install -e git+https://github.com/cezary986/igor#egg=igor
+```
+
 ## Creating API
 Usage of this module is quite easy. First you need some Python API for your clients.
 To make an API from you code you need to create a dictionary object with a following structure:
