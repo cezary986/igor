@@ -1,4 +1,4 @@
-# Igor Server
+# Igor
 
 Simple solution fo integrating python and modern web-based desktop apps e.g build using Elector.
 
