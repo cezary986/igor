@@ -19,28 +19,15 @@ CONFIG = {
     'log_level': logging.DEBUG,
 }
 
-"""
-Igor provides a simple abstraction over websocktes to simplyfy integration beetween python
-and webbrowser apps lik e.g  Elector apps. 
-
-It consist of simple python module (server) and two client libraries for pure Javascript and
-for Angular which make it pretty easy to use
-"""
-
-
 class IgorServer:
-
 
     def __init__(self, api=None, config=CONFIG):
         """
-        Construct a new 'IgorServer' object.
-
         :param host: optional host of the server, default is 'localhost'
         :param port: optional port of the server, default is 5678
         :param api: dictionary object with available API and handlers, where key is action name and value is action
         handler function
         :log_level actions: optional logging level, default is INFO
-        :return: nothing
         """
         if not isinstance(api, dict):
             raise Exception("API config object must be dictionary object")
@@ -76,9 +63,9 @@ class IgorServer:
         self.server.run_forever()
 
     def __register_new_client(self, client, server):
-        if client.get('id', None) == None:
+        if client.get('id', None) is None:
             raise Exception('Trying to register client without id')
-        if self.clients.get(client['id'], None) != None:
+        if self.clients.get(client['id'], None) is not None:
             raise Exception('Client with id: "' + client['id'] + '" already connected')
         logging.debug('New client: "' + str(client['id']) + '" registered')
         self.clients[client['id']] = client
@@ -87,14 +74,14 @@ class IgorServer:
     def __unregister_client(self, client, server):
         logging.debug('Client: "' + str(client['id']) + '" unregistered')
         del self.clients[client['id']]
-        def delete_session(client_id, server):
-            client = server.clients.get(client_id, None)
-            if client == None:
+
+        def delete_session(client_id, igor_server):
+            _client = igor_server.clients.get(client_id, None)
+            if _client is None:
                 del self.sessions[client_id]
         timeout = Timer(self.session_delete_timeout, delete_session, [client['id'], self])
         self.timeouts[client['id']] = timeout
         timeout.start()
-        
 
     def __add_new_stream(self, stream_id, client):
         logging.debug('Stream added')
@@ -107,14 +94,20 @@ class IgorServer:
         del real_self.streams[stream_id]
 
     def add_process(self, process_id, thread):
-        output = ProcessOutput(process_id, self, self.remove_process)
+        """
+        Adds new process to server - it won't be started immediately, to start it run: run_forever method
+
+        :process_id: id of the process
+        :thread: thread object of the process
+        """
+        output = ProcessOutput(process_id, self, self._IgorServer__remove_process)
         thread.process_id = process_id
         thread.output = output
         thread.scope = self.scope
         thread.sessions = self.sessions
         self.processes[process_id] = {'thread': thread, 'output': output}
 
-    def remove_process(self, real_self, process_id):
+    def __remove_process(self, real_self, process_id):
         logging.debug('Process with id: "' + process_id + '" finished and is removed')
         real_self.processes[process_id]['thread'].kill()
         del real_self.processes[process_id]
@@ -125,14 +118,14 @@ class IgorServer:
 
     def __introduce_self(self, client, stream_data):
         client_id = stream_data.get('client_id', None)
-        if client_id == None:
+        if client_id is None:
             self.__send_erorr(client, 'No client_id for introduce_self action', code=400)
             return
         else:
             client_session = self.sessions.get(client_id, None)
-            if client_session != None:
+            if client_session is not None:
                 timeout = self.timeouts.get(client['id'], None)
-                if timeout != None:
+                if timeout is not None:
                     timeout.cancel()
             else:
                 client_session = self.sessions[client['id']]
@@ -145,26 +138,26 @@ class IgorServer:
     def __main_handler(self, client, server, message):
         try:
             message = json.loads(message)
-            streamId = message.get('streamId', None)
+            stream_id = message.get('streamId', None)
 
-            if streamId == None:
+            if stream_id is None:
                 self.__send_erorr(client, 'No streamId specified', code=400)
             else:
                 stream_data = message.get('data', None)
                 action = message.get('action', None)
-                if action == None:
+                if action is None:
                     self.__send_erorr(client, 'No action specified', code=400)
                     return
                 if action == 'introduce_self':
                     self.__introduce_self(client, stream_data)
                     return
                 handler_function = self.paths.get(action, None)
-                if handler_function == None:
+                if handler_function is None:
                     self.__send_erorr(client, 'No damn handler for action: "' + action + '"', code=400)
                     return
-                stream = self.streams.get(streamId, None)
-                if stream == None:
-                    stream = self.__add_new_stream(streamId, client)
+                stream = self.streams.get(stream_id, None)
+                if stream is None:
+                    stream = self.__add_new_stream(stream_id, client)
                 session = self.sessions.get(client['id'], None)
                 print(session)
 
@@ -172,12 +165,12 @@ class IgorServer:
                 
         except Exception as error:
             logging.error(str(error))
-            raise error
             self.__send_erorr(client, 'Undefined error occured while handling message', code=503)
+            raise error
 
     def bind_with_ui_process(self, ui_process):
         """Binds server with uid process, for example Electron app.
-        It will kill server automaticly after ui process dies
+        It will kill server automatically after ui process dies
 
         Example:
             ui_process = subprocess.Popen(['ui.exe'])

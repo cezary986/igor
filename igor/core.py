@@ -40,6 +40,9 @@ class Stream:
         self.__on_close_callback(self.__igor_server, self.stream_id)
 
 class ProcessOutput:
+    """
+    Output stream class for processes
+    """
 
     def __init__(self, process_id, igor_server, on_finish_callback):
         self.__igor_server = igor_server
@@ -72,11 +75,11 @@ class ProcessOutput:
             'streamId': self.process_id,
             'error': str(error)
         })
-        if client_id == None:
+        if client_id is None:
             self.__igor_server.server.send_message_to_all(serialized_message)
         else:
             client = self.__igor_server.clients.get(client_id, None)
-            if client == None:
+            if client is None:
                 raise Exception('No client with given id exist. Id= "' + client_id + '"')
             else:
                 self.__igor_server.server.send_message(client, serialized_message)
@@ -93,6 +96,9 @@ class ProcessOutput:
 
 
 async def handler_wrapper(handler_function, stream, data, session, scope):
+    """
+    Wrapper around handler function. Automatically closes stream and handles errors
+    """
     try:
        handler_function(stream, data, session=session, scope=scope)
        stream.close()
@@ -103,6 +109,9 @@ async def handler_wrapper(handler_function, stream, data, session, scope):
         raise error
             
 class IgorProcess(Thread):
+    """
+    Base class for all proceses
+    """
     scope = None
     process_id = None
     output = None

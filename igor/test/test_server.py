@@ -107,7 +107,7 @@ class TestServer(unittest.TestCase):
         thread_mock.kill = Mock()
         igor_server.processes[PROCESS_ID] = {
             'thread': thread_mock, 'output': None}
-        igor_server.remove_process(igor_server, PROCESS_ID)
+        igor_server._IgorServer__remove_process(igor_server, PROCESS_ID)
         self.assertEqual(thread_mock.kill.call_count, 1, 'Thread kill method should be called once')
         self.assertTrue(igor_server.processes.get(PROCESS_ID, None)
                         == None, 'Should remove process from dictionary')

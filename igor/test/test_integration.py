@@ -14,7 +14,7 @@ import websocket
 import os
 
 try:
-    igor_process = subprocess.Popen('START ' + os.getcwd() + '.\env\Scripts\python.exe server_instance.py', shell=True)
+    igor_process = subprocess.Popen('START ' + os.getcwd() + '\..\..\env\Scripts\python.exe server_instance.py', shell=True)
 except Exception:
     print('Unable to start igor server instance. Check if the port is not already in use')
 

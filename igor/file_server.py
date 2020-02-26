@@ -6,8 +6,8 @@ from threading import Thread
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        curent_path = os.path.dirname(os.path.realpath(__file__))
-        root_system_path = curent_path.split('\\')[0] + '/'
+        current_path = os.path.dirname(os.path.realpath(__file__))
+        root_system_path = current_path.split('\\')[0] + '/'
         self.directory = root_system_path
         super().__init__(*args, directory=self.directory, **kwargs)
 
