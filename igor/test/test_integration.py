@@ -1,22 +1,18 @@
 import sys
 sys.path.append('../../')
-import asyncio
 import time
-from mock import ClientMock
-from igor.core import IgorProcess, Stream
-from igor.server import IgorServer
 import unittest
-from unittest.mock import MagicMock, Mock
 import json
 import subprocess
 import websocket
-
 import os
 
+igor_process = None
 try:
     igor_process = subprocess.Popen('START ' + os.getcwd() + '\..\..\env\Scripts\python.exe server_instance.py', shell=True)
 except Exception:
     print('Unable to start igor server instance. Check if the port is not already in use')
+
 
 class TestServerIntegration(unittest.TestCase):
         
@@ -101,6 +97,16 @@ class TestServerIntegration(unittest.TestCase):
               received_message = json.loads(result)
         if received_message != None:
           self.fail('Process should be able to send messages only to specified client')
+
+    def test_file_server(self):
+        import urllib.request
+        try:
+            contents = urllib.request.urlopen("http://localhost:8080/test_integration.py").read()
+            if len(contents) == 0:
+                self.fail('Downloaded file should not be empty')
+        except Exception:
+            self.fail('Should be able to connect with file server')
+
 
 if __name__ == '__main__':
     time.sleep(2)

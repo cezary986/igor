@@ -25,8 +25,29 @@ API = {
 }
 ```
 
+Your API object could be a nested dictionary too but before passing it to Igor you need to flatten it with `flatten` function:
+
+```python
+from igor.core import flatten
+
+API = {
+    'events': {
+        'create': create_event,
+        'remove': remove_event,
+        'update': update_event, 
+    }
+    ...   
+}
+
+server = IgorServer(api=flatten(API))
+```
+
+Such code will flatten your dictionary merging it fields names with default separator `.` So to access your `create_event`
+function handler you now need to call action with id: `events.create` You can also change separator by passing `separator`
+argument to `flatten` function.
+
 Your handler function will be called by server each time any of your clients calls for certain action.
-Exampler handler function can looks like this:
+Example handler function can looks like this:
 
 ```python
 def hello(out, event, **kwargs):

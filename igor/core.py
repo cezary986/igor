@@ -2,6 +2,24 @@ import json
 import logging
 from threading import Thread
 
+
+def flatten(api_dictionary, separator='.'):
+    """
+    Flatten nested API dictionary. If merge keys of each nested level with given
+    separator - default is '.'
+
+    :param api_dictionary: nested api dictionary object with handlers
+    :param separator: string with which dictionary keys will be merges, default is '.'
+    :return: flattened dictionary with only one level of nest
+    """
+    for key, value in list(api_dictionary.items()):
+        if type(value) == dict:
+            flatten(value)
+            api_dictionary.pop(key)
+            for key_2, value_2 in value.items():
+                api_dictionary[key + separator + key_2] = value_2
+    return api_dictionary
+
 class Stream:
 
     def __init__(self, igor_server, client, stream_id, on_close_callback):

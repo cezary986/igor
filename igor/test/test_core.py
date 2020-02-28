@@ -3,10 +3,31 @@ sys.path.append('../../')
 
 import unittest
 from mock import IgorMock, ClientMock
-from igor.core import Stream, ProcessOutput, handler_wrapper
+from igor.core import Stream, ProcessOutput, handler_wrapper, flatten
 import json
 import time
 import asyncio
+
+class TestDictionaryFlatten(unittest.TestCase):
+
+  def test_flatten(self):
+    dictionary = {
+      'a': {
+        'b': 'c'
+      },
+      'd': 'e'
+    }
+    flattened = flatten(dictionary)
+    values = list(flattened.values())
+    keys = list(flattened.keys())
+    if len(keys) != 2 or len(values) != 2:
+      self.fail('Flattened dictionary should have two keys and two values')
+    if keys[1] != 'a.b':
+      self.fail('Flattened dictionary should have merged key names')
+    if keys[0] != 'd' or values[0] != 'e':
+      self.fail('Flattened dictionary should leave root level fields untouched')
+    if values[1] != 'c':
+      self.fail('Flattened fields should have correct values')
 
 class TestStream(unittest.TestCase):
 

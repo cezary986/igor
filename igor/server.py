@@ -14,20 +14,23 @@ CONFIG = {
     'host': 'localhost',
     'file_server': False,
     'file_server_config': {
-        'port': 8080
+        'enable': False,
+        'port': 8080,
+        'root_directory': None  # default is system root
     },
-    'log_level': logging.DEBUG,
+    'logging': {
+        'level': logging.ERROR,
+        'file_name': 'igor_error.log'
+    },
 }
+
 
 class IgorServer:
 
     def __init__(self, api=None, config=CONFIG):
         """
-        :param host: optional host of the server, default is 'localhost'
-        :param port: optional port of the server, default is 5678
-        :param api: dictionary object with available API and handlers, where key is action name and value is action
-        handler function
-        :log_level actions: optional logging level, default is INFO
+        :param api: api dictionary containing handler functions
+        :param config: config object
         """
         if not isinstance(api, dict):
             raise Exception("API config object must be dictionary object")
@@ -43,16 +46,27 @@ class IgorServer:
         self.scope = {}
         self.loop = asyncio.get_event_loop()
 
-        self.server = WebsocketServer(config['port'], host=config['host'], loglevel=config['log_level'])
+        self.server = WebsocketServer(
+            config['port'],
+            host=config['host'],
+            loglevel=config['logging']['level'])
         self.server.set_fn_new_client(self.__register_new_client)
         self.server.set_fn_client_left(self.__unregister_client)
         self.server.set_fn_message_received(self.__main_handler)
 
         self.session_delete_timeout = 10.0
 
-        if config['file_server']:
-            run_file_server(config['file_server_config']['port'])
-        
+        self.__configure(config)
+
+    def __configure(self, config):
+        if config['file_server_config']['enable']:
+            run_file_server(
+                config['file_server_config']['port'],
+                config['file_server_config']['root_directory'])
+        if config['logging']['file_name']:
+            logging.basicConfig(filename=config['logging']['file_name'])
+        logging.basicConfig(level=config['logging']['level'])
+
     def run_forever(self):
         logging.debug("Starting server")
         for process_id, process in self.processes.items():

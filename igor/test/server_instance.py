@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../../')
-
+import os
 from igor.server import IgorServer, CONFIG
 from threading import Thread
 import time
@@ -8,7 +8,11 @@ import time
 
 IGOR_CONFIG = CONFIG
 
-CONFIG['file_server'] = True
+CONFIG['file_server_config'] = {
+        'enable': True,
+        'port': 8080,
+        'root_directory': os.path.dirname(__file__)
+    }
 
 
 def echo(out, data, **kwargs):
@@ -30,7 +34,6 @@ class BacgroundProcess(Thread):
          self.counter = 0
 
      def run(self):
-        print('BacgroundProcess run')
         while True:
             time.sleep(1)
             self.counter = self.counter + 1
