@@ -167,7 +167,7 @@ class IgorServer:
                     return
                 handler_function = self.paths.get(action, None)
                 if handler_function is None:
-                    self.__send_erorr(client, 'No damn handler for action: "' + action + '"', code=400)
+                    self.__send_erorr(client, 'No handler for action: "' + action + '"', code=400)
                     return
                 stream = self.streams.get(stream_id, None)
                 if stream is None:
