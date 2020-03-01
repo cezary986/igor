@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="igor_server",
-    version="0.0.1",
+    version="0.0.2",
     author="Cezary Maszczyk",
     author_email="cezary.maszczyk@gmail.com",
     description="Simple solution fo integrating python and modern web-based desktop apps e.g build using Elector",
