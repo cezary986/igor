@@ -38,6 +38,7 @@ class IgorServer:
             self.paths = api
 
         self.config = config
+        self.file_server_threat = None
         self.streams = {}
         self.clients = {}
         self.timeouts = {}
@@ -60,7 +61,7 @@ class IgorServer:
 
     def __configure(self, config):
         if config['file_server_config']['enable']:
-            run_file_server(
+            self.file_server_threat = run_file_server(
                 config['file_server_config']['port'],
                 config['file_server_config']['root_directory'])
         if config['logging']['file_name']:
@@ -173,12 +174,14 @@ class IgorServer:
                 if stream is None:
                     stream = self.__add_new_stream(stream_id, client)
                 session = self.sessions.get(client['id'], None)
-                print(session)
 
                 self.loop.run_until_complete(handler_wrapper(handler_function, stream, stream_data, session, self.scope))
         except SystemExit:
             logging.debug('System exit exception shutting down')
+            if self.file_server_threat is not None:
+                self.file_server_threat.kill()
             _thread.interrupt_main()
+        
         except Exception as error:
             logging.error(str(error))
             self.__send_erorr(client, 'Undefined error occured while handling message', code=503)

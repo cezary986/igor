@@ -53,16 +53,22 @@ class FileServerProcess(Thread):
         :param root_directory: root directory from which server will serve files, if None it will be system root dir
         """
         self.port = port
+        self.httpd = None
         self.root_directory = root_directory
         Thread.__init__(self)
 
     def run(self):
         handlerClass = HandlerFactory(self.root_directory)
-        with socketserver.TCPServer(("", self.port), handlerClass) as httpd:
-            httpd.serve_forever()
+
+        self.httpd = socketserver.TCPServer(("", self.port), handlerClass)
+        self.httpd.serve_forever()
+    
+    def kill(self):
+        self.httpd.shutdown()
 
 
 def run_file_server(port=8080, root_directory=None):
     thread = FileServerProcess(port, root_directory)
     thread.deamon = True
     thread.start()
+    return thread
