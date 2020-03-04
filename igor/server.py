@@ -176,35 +176,10 @@ class IgorServer:
                 print(session)
 
                 self.loop.run_until_complete(handler_wrapper(handler_function, stream, stream_data, session, self.scope))
-                
+        except SystemExit:
+            logging.debug('System exit exception shutting down')
+            _thread.interrupt_main()
         except Exception as error:
             logging.error(str(error))
             self.__send_erorr(client, 'Undefined error occured while handling message', code=503)
             raise error
-
-    def bind_with_ui_process(self, ui_process):
-        """Binds server with uid process, for example Electron app.
-        It will kill server automatically after ui process dies
-
-        Example:
-            ui_process = subprocess.Popen(['ui.exe'])
-            igor = IgorServer(api=ACTIONS)
-            igor.bind_with_frontend_process(ui_process)
-
-        :param ui_process: ui process
-        :return: nothing
-        """
-        def observe_ui_process():
-            while True:
-                time.sleep(2)
-                poll = ui_process.poll()
-                if poll != None:
-                    # kill yourself
-                    logging.debug('Finishing myself')
-                    self.__kill()
-        th = threading.Thread(target=observe_ui_process)
-        th.daemon = True
-        th.start()
-
-    def __kill(self):
-        _thread.interrupt_main()

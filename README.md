@@ -87,15 +87,36 @@ To see all fields allowed in config dictionary see the `server.py` file
 
 ## Binding with UI process
 
-Igor is intended to work as a kind of backend for desktop applications. It is therefore desirable for it to run only as long as the ui process. There in build-in method in igor to achieve this:
+Igor is intended to work as a kind of backend for desktop applications. It is therefore desirable for it to run only as long as the ui process. If you are using Electron
+you may achieve it with a use of simple function handler:
 
+In your python code:
 ```python
-ui_process = subprocess.Popen(['ui.exe'])
-igor = IgorServer(api=ACTIONS)
-igor.bind_with_frontend_process(ui_process)
-```
+def shutdown_igor(out, data, **kwargs):
+    sys.exit() # shutdown igor and whole Python program
 
-This way igor will observe your ui process and shut down automatically after its death.
+ACTIONS = {
+    ...
+    'shutdown': shutdown_igor
+}
+```
+Then you need to make sure that `shutdown` action will be called when user exit UI process. In Electron you can use `window-all-closed` event for this. In your `main.js`:
+```js
+app.on('window-all-closed', function () {
+  if (process.platform !== 'darwin') {
+    // shutdown igor process
+    const ws = new WebSocket('ws://127.0.0.1:5678');
+    ws.on('open', function open() {
+      ws.send(JSON.stringify({
+        streamId: 'igor_shutdown',
+        action: 'shutdown',
+        data: null
+      }));
+      app.quit()
+    });
+  }
+})
+```
 
 ## Processes
 

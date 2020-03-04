@@ -120,6 +120,10 @@ async def handler_wrapper(handler_function, stream, data, session, scope):
     try:
        handler_function(stream, data, session=session, scope=scope)
        stream.close()
+    except SystemExit as system_exit:
+        # System exit exception should be passed heigher
+        stream.close()
+        raise system_exit
     except Exception as error:
         logging.error(error)
         stream.send_error(str(error))

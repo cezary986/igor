@@ -171,15 +171,5 @@ class TestServer(unittest.TestCase):
         igor_server._IgorServer__main_handler(MagicMock(), MagicMock(), message)
         self.assertEqual(igor_server._IgorServer__send_erorr.call_count, 1, 'Should send error if there is no action specified in message')
 
-    def test_binding_to_ui_process(self):
-        igor_server = IgorServer(api={})
-        igor_server._IgorServer__send_erorr = Mock()
-        igor_server._IgorServer__kill = Mock()
-        mock_process = subprocess.Popen('ping 127.0.0.1')
-        igor_server.bind_with_ui_process(mock_process)
-        time.sleep(5)
-        mock_process.kill()
-        self.assertEqual(igor_server._IgorServer__kill.call_count, 1, 'Server should kill itself after ui process')
-
 if __name__ == '__main__':
     unittest.main()
