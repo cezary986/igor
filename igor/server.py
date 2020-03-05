@@ -57,19 +57,27 @@ class IgorServer:
 
         self.session_delete_timeout = 10.0
 
-        self.__configure(config)
+        self.logger = None
+        self.__configure(config)     
 
     def __configure(self, config):
         if config['file_server_config']['enable']:
             self.file_server_threat = run_file_server(
                 config['file_server_config']['port'],
                 config['file_server_config']['root_directory'])
+        logger = logging.getLogger(__name__)
+        log_handler = None
         if config['logging']['file_name']:
-            logging.basicConfig(filename=config['logging']['file_name'])
-        logging.basicConfig(level=config['logging']['level'])
+            log_handler = logging.FileHandler(config['logging']['file_name'])    
+        else:
+            log_handler = logging.StreamHandler()
+        log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logger.addHandler(log_handler)
+        logger.setLevel(level=config['logging']['level'])
+        self.logger = logger
 
     def run_forever(self):
-        logging.debug("Starting server")
+        self.logger.debug("Starting server")
         for process_id, process in self.processes.items():
             thread = process['thread']
             thread.daemon = True
@@ -82,12 +90,12 @@ class IgorServer:
             raise Exception('Trying to register client without id')
         if self.clients.get(client['id'], None) is not None:
             raise Exception('Client with id: "' + client['id'] + '" already connected')
-        logging.debug('New client: "' + str(client['id']) + '" registered')
+        self.logger.debug('New client: "' + str(client['id']) + '" registered')
         self.clients[client['id']] = client
         self.sessions[client['id']] = {}
 
     def __unregister_client(self, client, server):
-        logging.debug('Client: "' + str(client['id']) + '" unregistered')
+        self.logger.debug('Client: "' + str(client['id']) + '" unregistered')
         del self.clients[client['id']]
 
         def delete_session(client_id, igor_server):
@@ -99,13 +107,13 @@ class IgorServer:
         timeout.start()
 
     def __add_new_stream(self, stream_id, client):
-        logging.debug('Stream added')
+        self.logger.debug('Stream added')
         stream = Stream(self, client, stream_id, self.__remove_stream)
         self.streams[stream_id] = stream
         return stream
 
     def __remove_stream(self, real_self, stream_id):
-        logging.debug('Stream removed')
+        self.logger.debug('Stream removed')
         del real_self.streams[stream_id]
 
     def add_process(self, process_id, thread):
@@ -123,12 +131,12 @@ class IgorServer:
         self.processes[process_id] = {'thread': thread, 'output': output}
 
     def __remove_process(self, real_self, process_id):
-        logging.debug('Process with id: "' + process_id + '" finished and is removed')
+        self.logger.debug('Process with id: "' + process_id + '" finished and is removed')
         real_self.processes[process_id]['thread'].kill()
         del real_self.processes[process_id]
 
     def __send_erorr(self, client, message, code=500):
-        logging.error(message)
+        self.logger.error(message)
         self.server.send_message(client, json.dumps({'error': message, 'code': code}))
 
     def __introduce_self(self, client, stream_data):
@@ -177,12 +185,12 @@ class IgorServer:
 
                 self.loop.run_until_complete(handler_wrapper(handler_function, stream, stream_data, session, self.scope))
         except SystemExit:
-            logging.debug('System exit exception shutting down')
+            loggself.loggering.debug('System exit exception shutting down')
             if self.file_server_threat is not None:
                 self.file_server_threat.kill()
             _thread.interrupt_main()
         
         except Exception as error:
-            logging.error(str(error))
+            self.logger.error(str(error))
             self.__send_erorr(client, 'Undefined error occured while handling message', code=503)
             raise error

@@ -3,3 +3,6 @@ env/
 .idea/
 __pycache__/
 todo.todo
+presentation.py
+index.html
+*.log
