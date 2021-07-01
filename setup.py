@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="igor_server",
-    version="0.1.4",
+    name="igor",
+    version="0.1.5",
     author="Cezary Maszczyk",
     author_email="cezary.maszczyk@gmail.com",
     description="Simple solution fo integrating python and modern web-based desktop apps e.g build using Elector",
